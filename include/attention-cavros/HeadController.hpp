@@ -42,6 +42,6 @@ private:
     const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) const;
 };
 
-}  // namespace attention-cavros
+}  // namespace attention_cavros
 
 #endif  // ATTENTION_CAVROS__HEADCONTROLLER_HPP_

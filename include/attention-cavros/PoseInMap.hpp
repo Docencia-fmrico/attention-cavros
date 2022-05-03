@@ -41,6 +41,6 @@ private:
   void tf_callback(const tf2_msgs::msg::TFMessage::SharedPtr tf) const;
 };
 
-}  // namespace attention-cavros
+}  // namespace attention_cavros
 
 #endif  // ATTENTION_CAVROS__POSEINMAP_HPP_
