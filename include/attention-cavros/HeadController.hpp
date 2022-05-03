@@ -24,7 +24,7 @@
 
 using std::placeholders::_1;
 
-namespace attention-cavros
+namespace attention_cavros
 {
 
 class HeadControllerNode : public rclcpp::Node

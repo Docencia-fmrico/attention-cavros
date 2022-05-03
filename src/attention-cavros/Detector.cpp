@@ -15,7 +15,7 @@
 #include <string>
 #include "attention-cavros/Detector.hpp"
 
-namespace attention-cavros
+namespace attention_cavros
 {
 
 DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseconds & rate)

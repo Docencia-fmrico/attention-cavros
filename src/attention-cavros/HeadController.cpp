@@ -15,7 +15,7 @@
 #include <string>
 #include "attention-cavros/HeadController.hpp"
 
-namespace attention-cavros
+namespace attention_cavros
 {
 
 HeadControllerNode::HeadControllerNode(

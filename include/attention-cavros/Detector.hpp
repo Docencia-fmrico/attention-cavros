@@ -25,7 +25,7 @@
 
 using std::placeholders::_1;
 
-namespace attention-cavros
+namespace attention_cavros
 {
 
 class DetectorNode : public rclcpp_lifecycle::LifecycleNode

@@ -26,9 +26,9 @@ int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
 
-  auto tf_node = std::make_shared<attention-cavros::TFNode>("tf_node", 2s);
-  auto head_move_node = std::make_shared<attention-cavros::HeadControllerNode>("head_node", 1s);
-  auto detector_node = std::make_shared<attention-cavros::DetectorNode>("detector_node", 500ms);
+  auto tf_node = std::make_shared<attention_cavros::TFNode>("tf_node", 2s);
+  auto head_move_node = std::make_shared<attention_cavros::HeadControllerNode>("head_node", 1s);
+  auto detector_node = std::make_shared<attention_cavros::DetectorNode>("detector_node", 500ms);
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(head_move_node);
