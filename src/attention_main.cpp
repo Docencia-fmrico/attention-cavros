@@ -30,6 +30,10 @@ int main(int argc, char * argv[])
   auto head_move_node = std::make_shared<attention_cavros::HeadControllerNode>("head_node", 1s);
   auto detector_node = std::make_shared<attention_cavros::DetectorNode>("detector_node", 500ms);
 
+  detector_node->declare_parameter("detection_distance", 0.0);
+  double distance = detector_node->get_parameter("detection_distance").get_value<double>();
+  RCLCPP_INFO(detector_node->get_logger(), "distance: %lf", distance);
+
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(head_move_node);
   executor.add_node(detector_node->get_node_base_interface());

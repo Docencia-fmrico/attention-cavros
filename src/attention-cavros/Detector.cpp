@@ -29,8 +29,7 @@ DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseco
   timer_ = create_wall_timer(
     rate, std::bind(&DetectorNode::near_objects_publisher, this));
 
-  this->declare_parameter("target_objects");
-  this->declare_parameter("detection_distance", 0.0);
+  // this->declare_parameter("target_objects");
 }
 
 using CallbackReturnT =
@@ -42,15 +41,15 @@ DetectorNode::on_configure(const rclcpp_lifecycle::State & state)
   RCLCPP_INFO(get_logger(), "*******************************");
   RCLCPP_INFO(get_logger(), "[%s] On_configure desde [%s]", get_name(), state.label().c_str());
 
-  rclcpp::Parameter targets_param_format("target_objects", std::vector<std::string>({}));
-  this->get_parameter("target_objects", targets_param_format);
-  targets_ = targets_param_format.as_string_array();
+  // rclcpp::Parameter targets_param_format("target_objects", std::vector<std::string>({}));
+  // this->get_parameter("target_objects", targets_param_format);
+  // targets_ = targets_param_format.as_string_array();
 
-  for (int i = 0; i < targets_.size(); i++)
-    RCLCPP_INFO(get_logger(), "[YAML] Recibido: %s", targets_[i]);
+  // for (int i = 0; i < targets_.size(); i++)
+  //   RCLCPP_INFO(get_logger(), "[YAML] Recibido: %s", targets_[i]);
   
 
-  detection_dist_ = this->get_parameter("detection_distance").get_value<double>();
+  detection_dist_ = get_parameter("detection_distance").get_value<double>();
   RCLCPP_INFO(get_logger(), "[YAML] Recibido: %lf", detection_dist_);
 
   RCLCPP_INFO(get_logger(), "*******************************");
