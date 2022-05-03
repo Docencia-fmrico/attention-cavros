@@ -37,6 +37,29 @@ void
 HeadControllerNode::head_publisher(void)
 {
   RCLCPP_INFO(get_logger(), "Publishing something...");
+  
+  trajectory_msgs::msg::JointTrajectory command_msg;
+  command_msg.header.stamp = now();
+  //command_msg.joint_names = last_state_->joint_names;
+  command_msg.points.resize(1);
+  command_msg.points[0].positions.resize(2);
+  command_msg.points[0].velocities.resize(2);
+  command_msg.points[0].accelerations.resize(2);
+
+  command_msg.points[0].positions[0] = 0.0;
+  command_msg.points[0].positions[1] = 0.0;
+
+  command_msg.points[0].velocities[0] = 0.1;
+  command_msg.points[0].velocities[1] = 0.1;
+
+  command_msg.points[0].accelerations[0] = 0.1;
+  command_msg.points[0].accelerations[1] = 0.1;
+
+  //command_msg.points[0].time_from_start = rclcpp::Duration(1s);
+
+  pub_->publish(command_msg);
+
+
 }
 
 void
