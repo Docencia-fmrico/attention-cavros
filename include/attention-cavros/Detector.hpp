@@ -17,6 +17,7 @@
 
 #include <string>
 #include <chrono>
+#include <vector>
 
 #include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -46,6 +47,8 @@ private:
   rclcpp::Subscription<gazebo_msgs::msg::ModelStates>::SharedPtr sub_;
   rclcpp_lifecycle::LifecyclePublisher<gazebo_msgs::msg::ModelStates>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
+  double detection_dist_;
+  std::vector<std::string> targets_;
 
   void near_objects_publisher(void);
 };

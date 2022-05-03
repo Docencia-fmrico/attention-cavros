@@ -33,7 +33,7 @@ ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 add_executable(attention_main src/attention_main.cpp)
 target_link_libraries(attention_main ${PROJECT_NAME})
 
-install(DIRECTORY include
+install(DIRECTORY include config
     DESTINATION share/${PROJECT_NAME}
 )
 
