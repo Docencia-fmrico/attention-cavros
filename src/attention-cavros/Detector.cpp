@@ -79,4 +79,4 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::ModelStates::SharedP
   RCLCPP_INFO(get_logger(), "Recv data...");
 }
 
-}  // namespace attention-cavros
+}  // namespace attention_cavros

@@ -69,4 +69,4 @@ HeadControllerNode::head_state_callback(
   RCLCPP_INFO(get_logger(), "Recv head state...");
 }
 
-}  // namespace attention-cavros
+}  // namespace attention_cavros

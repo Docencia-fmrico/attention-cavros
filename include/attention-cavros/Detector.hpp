@@ -50,6 +50,6 @@ private:
   void near_objects_publisher(void);
 };
 
-}  // namespace attention-cavros
+}  // namespace attention_cavros
 
 #endif  // ATTENTION_CAVROS__DETECTOR_HPP_
