@@ -17,11 +17,13 @@
 
 #include <string>
 #include <chrono>
+#include <vector>
 
 #include "lifecycle_msgs/msg/state.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "gazebo_msgs/msg/model_states.hpp"
+#include "gazebo_msgs/msg/link_states.hpp"
+#include "geometry_msgs/msg/point.hpp"
 
 using std::placeholders::_1;
 
@@ -40,14 +42,23 @@ public:
   CallbackReturnT on_activate(const rclcpp_lifecycle::State & state);
   CallbackReturnT on_deactivate(const rclcpp_lifecycle::State & state);
 
-  void model_states_callback(const gazebo_msgs::msg::ModelStates::SharedPtr states);
+  void model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states);
 
 private:
-  rclcpp::Subscription<gazebo_msgs::msg::ModelStates>::SharedPtr sub_;
-  rclcpp_lifecycle::LifecyclePublisher<gazebo_msgs::msg::ModelStates>::SharedPtr pub_;
+  rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr sub_;
+  rclcpp_lifecycle::LifecyclePublisher<gazebo_msgs::msg::LinkStates>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
+  std::chrono::nanoseconds rate_;
+
+  double detection_dist_;
+
+  std::vector<std::string> targets_;
+  std::vector<std::string> finded_targets_;
+  std::vector<geometry_msgs::msg::Point> finded_coords_;
+
   void near_objects_publisher(void);
+  std::vector<std::string> split(std::string str, char del);
 };
 
 }  // namespace attention_cavros
