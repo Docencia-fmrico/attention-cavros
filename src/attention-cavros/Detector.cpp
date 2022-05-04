@@ -51,10 +51,11 @@ DetectorNode::on_configure(const rclcpp_lifecycle::State & state)
 CallbackReturnT
 DetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 {
+  RCLCPP_INFO(get_logger(), "[%s] On_activate desde [%s]", get_name(), state.label().c_str());
+
   timer_ = create_wall_timer(
     rate_, std::bind(&DetectorNode::near_objects_publisher, this));
-    
-  RCLCPP_INFO(get_logger(), "[%s] On_activate desde [%s]", get_name(), state.label().c_str());
+
   pub_->on_activate();
 
   return CallbackReturnT::SUCCESS;
@@ -63,11 +64,10 @@ DetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 CallbackReturnT
 DetectorNode::on_deactivate(const rclcpp_lifecycle::State & state)
 {
-  // Se muere el proceso ¿?¿?¿?¿?¿
-  timer_ = nullptr;
   RCLCPP_INFO(get_logger(), "[%s] On_deactivate desde [%s]", get_name(), state.label().c_str());
-  pub_.reset();
+
   pub_->on_deactivate();
+  timer_ = nullptr;
 
   return CallbackReturnT::SUCCESS;
 }
@@ -86,21 +86,21 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
   // Indexes of the desired splits
   const unsigned int IDX_GENERAL_NAME = 2, IDX_SPECIFIC_NAME = 0;
 
-  for (int i = 0; i < states->name.size(); i++){
+  for (int i = 0; i < states->name.size(); i++) {
     std::vector<std::string> current_str_v = split(states->name[i], ':');
 
     // Filter models and saves them into a vector
-    for (int j = 0; j < targets_.size(); j++){
-      if (current_str_v[IDX_GENERAL_NAME] == targets_[j]){
+    for (int j = 0; j < targets_.size(); j++) {
+      if (current_str_v[IDX_GENERAL_NAME] == targets_[j]) {
         // SUSTITUIR POR LA POSE DEL ROBOT CON RESPECTO AL MAPA
         int robot_x = 0, robot_y = 0;
         double circle_eq;
 
         circle_eq = pow(states->pose[i].position.x - robot_x, 2) +
-                    pow(states->pose[i].position.y - robot_y, 2);
+          pow(states->pose[i].position.y - robot_y, 2);
 
         // 2nd Filter, if object inside detection radius, added.
-        if (circle_eq <= pow(detection_dist_, 2)){
+        if (circle_eq <= pow(detection_dist_, 2)) {
           geometry_msgs::msg::Point current_point;
 
           current_point.x = states->pose[i].position.x;
@@ -115,25 +115,25 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
   }
 
   // Debug
-  for (int i = 0; i < finded_targets_.size(); i++){
+  for (int i = 0; i < finded_targets_.size(); i++) {
     RCLCPP_INFO(get_logger(), "name: %s", finded_targets_[i].c_str());
-    RCLCPP_INFO(get_logger(), "\tx: %f",finded_coords_[i].x);
-    RCLCPP_INFO(get_logger(), "\ty: %f",finded_coords_[i].y);
-    RCLCPP_INFO(get_logger(), "\tz: %f",finded_coords_[i].z);
+    RCLCPP_INFO(get_logger(), "\tx: %f", finded_coords_[i].x);
+    RCLCPP_INFO(get_logger(), "\ty: %f", finded_coords_[i].y);
+    RCLCPP_INFO(get_logger(), "\tz: %f", finded_coords_[i].z);
   }
 
   finded_targets_.clear();
   finded_coords_.clear();
 }
 
-std::vector<std::string> 
+std::vector<std::string>
 DetectorNode::split(std::string str, char del)
 {
   std::string temp = "";
   std::vector<std::string> result;
 
-  for (int i = 0; i < (int)str.size(); i++){
-    if(str[i] != del){
+  for (int i = 0; i < str.size(); i++) {
+    if (str[i] != del) {
       temp += str[i];
     } else {
       result.push_back(temp);

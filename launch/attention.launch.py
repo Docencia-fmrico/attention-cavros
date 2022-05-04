@@ -13,26 +13,23 @@
 # limitations under the License.
 
 import os
-
 from ament_index_python.packages import get_package_share_directory
-
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
- 
-  pkg_dir = get_package_share_directory('attention-cavros')
-  config_dir = os.path.join(pkg_dir, 'config')
-  config_file = os.path.join(config_dir, 'detector.yaml')
+    pkg_dir = get_package_share_directory('attention-cavros')
+    config_dir = os.path.join(pkg_dir, 'config')
+    config_file = os.path.join(config_dir, 'detector.yaml')
 
-  file_param_node_cmd = Node(
-    package='attention-cavros',
-    executable='attention_main',
-    output='screen',
-    parameters=[config_file])
-  
-  ld = LaunchDescription()
-  ld.add_action(file_param_node_cmd)
+    file_param_node_cmd = Node(
+        package='attention-cavros',
+        executable='attention_main',
+        output='screen',
+        parameters=[config_file])
 
-  return ld
+    ld = LaunchDescription()
+    ld.add_action(file_param_node_cmd)
+
+    return ld
