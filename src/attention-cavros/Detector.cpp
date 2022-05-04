@@ -22,9 +22,9 @@ namespace attention_cavros
 DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseconds & rate)
 : LifecycleNode(name)
 {
-  pub_ = create_publisher<gazebo_msgs::msg::ModelStates>("/near_objects/filtered", 10);
-  sub_ = create_subscription<gazebo_msgs::msg::ModelStates>(
-    "/gazebo/model_states", 10, std::bind(&DetectorNode::model_states_callback, this, _1));
+  pub_ = create_publisher<gazebo_msgs::msg::LinkStates>("/near_objects/filtered", 10);
+  sub_ = create_subscription<gazebo_msgs::msg::LinkStates>(
+    "/gazebo/link_states", 10, std::bind(&DetectorNode::model_states_callback, this, _1));
 
   timer_ = create_wall_timer(
     rate, std::bind(&DetectorNode::near_objects_publisher, this));
@@ -83,9 +83,12 @@ DetectorNode::near_objects_publisher(void)
 }
 
 void
-DetectorNode::model_states_callback(const gazebo_msgs::msg::ModelStates::SharedPtr states)
+DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states)
 {
-  RCLCPP_INFO(get_logger(), "Recv data...");
+  RCLCPP_INFO(get_logger(), "states.names: %s", states->name[20].c_str());
+  RCLCPP_INFO(get_logger(), "states.pose.x: %f", states->pose[20].position.x);
+  RCLCPP_INFO(get_logger(), "states.pose.y: %f", states->pose[20].position.y);
+  RCLCPP_INFO(get_logger(), "states.pose.z: %f", states->pose[20].position.z);
 }
 
 }  // namespace attention_cavros
