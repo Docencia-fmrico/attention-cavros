@@ -41,6 +41,12 @@ void
 TFNode::tf_callback(const tf2_msgs::msg::TFMessage::SharedPtr tf) const
 {
   RCLCPP_INFO(get_logger(), "Recv tf's...");
+  int i = 0;
+  while (tf->transforms[i] != NULL)
+  {
+    RCLCPP_INFO(get_logger(), "Received in position %d: %s", i, tf->transforms[i].child_frame_id.c_str());
+    i++;
+  }
 }
 
 }  // namespace attention_cavros

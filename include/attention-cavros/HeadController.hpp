@@ -36,6 +36,7 @@ private:
   rclcpp::Subscription<control_msgs::msg::JointTrajectoryControllerState>::SharedPtr sub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
+  control_msgs::msg::JointTrajectoryControllerState received_state_;
 
   void head_publisher(void);
   void head_state_callback(
