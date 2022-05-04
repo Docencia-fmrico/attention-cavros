@@ -121,6 +121,9 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
     RCLCPP_INFO(get_logger(), "\ty: %f",finded_coords_[i].y);
     RCLCPP_INFO(get_logger(), "\tz: %f",finded_coords_[i].z);
   }
+
+  finded_targets_.clear();
+  finded_coords_.clear();
 }
 
 std::vector<std::string> 
