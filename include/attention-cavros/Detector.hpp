@@ -47,10 +47,17 @@ private:
   rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr sub_;
   rclcpp_lifecycle::LifecyclePublisher<gazebo_msgs::msg::LinkStates>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
+
+  std::chrono::nanoseconds rate_;
+
   double detection_dist_;
+
   std::vector<std::string> targets_;
+  std::vector<std::string> finded_targets_;
+  
 
   void near_objects_publisher(void);
+  std::vector<std::string> split(std::string str, char del);
 };
 
 }  // namespace attention_cavros

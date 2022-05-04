@@ -20,14 +20,11 @@ namespace attention_cavros
 {
 
 DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseconds & rate)
-: LifecycleNode(name)
+: LifecycleNode(name), rate_(rate)
 {
   pub_ = create_publisher<gazebo_msgs::msg::LinkStates>("/near_objects/filtered", 10);
   sub_ = create_subscription<gazebo_msgs::msg::LinkStates>(
     "/gazebo/link_states", 10, std::bind(&DetectorNode::model_states_callback, this, _1));
-
-  timer_ = create_wall_timer(
-    rate, std::bind(&DetectorNode::near_objects_publisher, this));
 
   declare_parameter("detection_distance", 0.0);
   declare_parameter("target_objects");
@@ -52,7 +49,9 @@ DetectorNode::on_configure(const rclcpp_lifecycle::State & state)
 CallbackReturnT
 DetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 {
-  // Crear timer?
+  timer_ = create_wall_timer(
+    rate_, std::bind(&DetectorNode::near_objects_publisher, this));
+    
   RCLCPP_INFO(get_logger(), "[%s] On_activate desde [%s]", get_name(), state.label().c_str());
   pub_->on_activate();
 
@@ -62,7 +61,7 @@ DetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 CallbackReturnT
 DetectorNode::on_deactivate(const rclcpp_lifecycle::State & state)
 {
-  // Destruir timer?
+  timer_ = nullptr;
   RCLCPP_INFO(get_logger(), "[%s] On_deactivate desde [%s]", get_name(), state.label().c_str());
   pub_.reset();
   pub_->on_deactivate();
@@ -85,10 +84,39 @@ DetectorNode::near_objects_publisher(void)
 void
 DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states)
 {
-  RCLCPP_INFO(get_logger(), "states.names: %s", states->name[20].c_str());
-  RCLCPP_INFO(get_logger(), "states.pose.x: %f", states->pose[20].position.x);
-  RCLCPP_INFO(get_logger(), "states.pose.y: %f", states->pose[20].position.y);
-  RCLCPP_INFO(get_logger(), "states.pose.z: %f", states->pose[20].position.z);
+  const unsigned int IDX_GENERAL_NAME = 2,
+                     IDX_SPECIFIC_NAME = 0;  // Index of the desired splits
+
+  if (finded_targets_.empty()){
+    for (int i = 0; i < states->name.size(); i++){
+      std::vector<std::string> current_str_v = split(states->name[i], ':');
+
+      // Filter models and saves them into a vector
+      for (int j = 0; j < targets_.size(); j++){
+        if (current_str_v[IDX_GENERAL_NAME] == targets_[j]){
+          finded_targets_.push_back(current_str_v[IDX_SPECIFIC_NAME]);
+        }
+      }
+    }
+  }
+}
+
+std::vector<std::string> 
+DetectorNode::split(std::string str, char del)
+{
+  std::string temp = "";
+  std::vector<std::string> result;
+
+  for (int i = 0; i < (int)str.size(); i++){
+    if(str[i] != del){
+      temp += str[i];
+    } else {
+      result.push_back(temp);
+      temp = "";
+    }
+  }
+  result.push_back(temp);
+  return result;
 }
 
 }  // namespace attention_cavros
