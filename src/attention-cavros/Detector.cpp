@@ -14,6 +14,8 @@
 
 #include <string>
 #include <vector>
+#include <cmath>
+
 #include "attention-cavros/Detector.hpp"
 
 namespace attention_cavros
@@ -84,13 +86,21 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
   // Indexes of the desired splits
   const unsigned int IDX_GENERAL_NAME = 2, IDX_SPECIFIC_NAME = 0;
 
-  if (finded_targets_.empty() && finded_coords_.empty()){
-    for (int i = 0; i < states->name.size(); i++){
-      std::vector<std::string> current_str_v = split(states->name[i], ':');
+  for (int i = 0; i < states->name.size(); i++){
+    std::vector<std::string> current_str_v = split(states->name[i], ':');
 
-      // Filter models and saves them into a vector
-      for (int j = 0; j < targets_.size(); j++){
-        if (current_str_v[IDX_GENERAL_NAME] == targets_[j]){
+    // Filter models and saves them into a vector
+    for (int j = 0; j < targets_.size(); j++){
+      if (current_str_v[IDX_GENERAL_NAME] == targets_[j]){
+        // SUSTITUIR POR LA POSE DEL ROBOT CON RESPECTO AL MAPA
+        int robot_x = 0, robot_y = 0;
+        double circle_eq;
+
+        circle_eq = pow(states->pose[i].position.x - robot_x, 2) +
+                    pow(states->pose[i].position.y - robot_y, 2);
+
+        // 2nd Filter, if object inside detection radius, added.
+        if (circle_eq <= pow(detection_dist_, 2)){
           geometry_msgs::msg::Point current_point;
 
           current_point.x = states->pose[i].position.x;
