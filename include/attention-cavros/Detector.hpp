@@ -23,6 +23,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "gazebo_msgs/msg/link_states.hpp"
+#include "geometry_msgs/msg/point.hpp"
 
 using std::placeholders::_1;
 
@@ -54,7 +55,7 @@ private:
 
   std::vector<std::string> targets_;
   std::vector<std::string> finded_targets_;
-  
+  std::vector<geometry_msgs::msg::Point> finded_coords_;
 
   void near_objects_publisher(void);
   std::vector<std::string> split(std::string str, char del);

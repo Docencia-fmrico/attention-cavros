@@ -61,6 +61,7 @@ DetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 CallbackReturnT
 DetectorNode::on_deactivate(const rclcpp_lifecycle::State & state)
 {
+  // Se muere el proceso ¿?¿?¿?¿?¿
   timer_ = nullptr;
   RCLCPP_INFO(get_logger(), "[%s] On_deactivate desde [%s]", get_name(), state.label().c_str());
   pub_.reset();
@@ -72,10 +73,6 @@ DetectorNode::on_deactivate(const rclcpp_lifecycle::State & state)
 void
 DetectorNode::near_objects_publisher(void)
 {
-  if (get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
-    return;
-  }
-
   if (pub_->is_activated()) {
     RCLCPP_INFO(get_logger(), "Publishing detection...");
   }
@@ -84,20 +81,35 @@ DetectorNode::near_objects_publisher(void)
 void
 DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states)
 {
-  const unsigned int IDX_GENERAL_NAME = 2,
-                     IDX_SPECIFIC_NAME = 0;  // Index of the desired splits
+  // Indexes of the desired splits
+  const unsigned int IDX_GENERAL_NAME = 2, IDX_SPECIFIC_NAME = 0;
 
-  if (finded_targets_.empty()){
+  if (finded_targets_.empty() && finded_coords_.empty()){
     for (int i = 0; i < states->name.size(); i++){
       std::vector<std::string> current_str_v = split(states->name[i], ':');
 
       // Filter models and saves them into a vector
       for (int j = 0; j < targets_.size(); j++){
         if (current_str_v[IDX_GENERAL_NAME] == targets_[j]){
+          geometry_msgs::msg::Point current_point;
+
+          current_point.x = states->pose[i].position.x;
+          current_point.y = states->pose[i].position.y;
+          current_point.z = states->pose[i].position.z;
+
           finded_targets_.push_back(current_str_v[IDX_SPECIFIC_NAME]);
+          finded_coords_.push_back(current_point);
         }
       }
     }
+  }
+
+  // Debug
+  for (int i = 0; i < finded_targets_.size(); i++){
+    RCLCPP_INFO(get_logger(), "name: %s", finded_targets_[i].c_str());
+    RCLCPP_INFO(get_logger(), "\tx: %f",finded_coords_[i].x);
+    RCLCPP_INFO(get_logger(), "\ty: %f",finded_coords_[i].y);
+    RCLCPP_INFO(get_logger(), "\tz: %f",finded_coords_[i].z);
   }
 }
 
