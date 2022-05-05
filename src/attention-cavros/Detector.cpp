@@ -30,6 +30,16 @@ DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseco
 
   declare_parameter("detection_distance", 0.0);
   declare_parameter("target_objects");
+
+  auto rclcpp_node = rclcpp::Node::make_shared(name);
+  graph_ = std::make_shared<ros2_knowledge_graph::GraphNode>(rclcpp_node);
+  ros2_knowledge_graph_msgs::msg::Node test_node;
+  test_node.node_name = "Ruben";
+  test_node.node_class = "Person";
+  graph_->update_node(test_node);
+  /*
+  graph_->add_node(&test_node);
+  */
 }
 
 using CallbackReturnT =
