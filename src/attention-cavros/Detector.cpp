@@ -31,15 +31,8 @@ DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseco
   declare_parameter("detection_distance", 0.0);
   declare_parameter("target_objects");
 
-  auto rclcpp_node = rclcpp::Node::make_shared(name);
+  auto rclcpp_node = rclcpp::Node::make_shared("Graph");
   graph_ = std::make_shared<ros2_knowledge_graph::GraphNode>(rclcpp_node);
-  ros2_knowledge_graph_msgs::msg::Node test_node;
-  test_node.node_name = "Ruben";
-  test_node.node_class = "Person";
-  graph_->update_node(test_node);
-  /*
-  graph_->add_node(&test_node);
-  */
 }
 
 using CallbackReturnT =
@@ -95,9 +88,26 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
 {
   // Indexes of the desired splits
   const unsigned int IDX_GENERAL_NAME = 2, IDX_SPECIFIC_NAME = 0;
-
+  ros2_knowledge_graph_msgs::msg::Node new_node;
   for (int i = 0; i < states->name.size(); i++) {
     std::vector<std::string> current_str_v = split(states->name[i], ':');
+    // RCLCPP_INFO(get_logger(), "States[%d]: %s:%s:%s", i, current_str_v[0].c_str(), current_str_v[1].c_str(), current_str_v[2].c_str());
+    // RCLCPP_INFO(get_logger(), "Comparing %s with tiago. Result:%d", current_str_v[0].c_str(), strcmp(current_str_v[0].c_str(), "tiago") == 0);
+    // RCLCPP_INFO(get_logger(), "Comparing %s with head_1_link. Result: %d", current_str_v[2].c_str(), strcmp(current_str_v[2].c_str(), "head_1_link") == 0);
+    // RCLCPP_INFO(get_logger(), "Result: %d", strcmp(current_str_v[0].c_str(), "tiago") == 0 && strcmp(current_str_v[2].c_str(), "head_1_link") == 0);
+    //RCLCPP_INFO(get_logger(), "Comparing %s with link and %s with %d", current_str_v[2].c_str(), graph_->exist_node("tiago"));
+    if (strcmp(current_str_v[0].c_str(), "tiago") == 0 && strcmp(current_str_v[2].c_str(), "head_1_link") == 0) {
+      RCLCPP_INFO(get_logger(), "Añadido %s", current_str_v[0].c_str());
+      new_node.node_name = "tiago";
+      new_node.node_class = "Robot";
+      graph_->update_node(new_node);
+    }
+    else if(strcmp(current_str_v[2].c_str(), "link") == 0 && graph_->exist_node("tiago")) {
+      RCLCPP_INFO(get_logger(), "Añadido %s", current_str_v[0].c_str());
+      new_node.node_name = current_str_v[0].c_str();
+      new_node.node_class = "Object";
+      graph_->update_node(new_node);
+    }
 
     // Filter models and saves them into a vector
     for (int j = 0; j < targets_.size(); j++) {

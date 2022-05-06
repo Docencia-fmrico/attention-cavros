@@ -40,7 +40,7 @@ install(DIRECTORY include config launch
 )
 
 install(TARGETS
-    attention_main
+    ${PROJECT_NAME}
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION lib/${PROJECT_NAME}
