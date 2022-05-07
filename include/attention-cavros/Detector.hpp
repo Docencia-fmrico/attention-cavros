@@ -24,6 +24,7 @@
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "gazebo_msgs/msg/link_states.hpp"
 #include "geometry_msgs/msg/point.hpp"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include "ros2_knowledge_graph/GraphNode.hpp"
 #include "ros2_knowledge_graph/graph_utils.hpp"
 

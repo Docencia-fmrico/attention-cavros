@@ -89,6 +89,10 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
   // Indexes of the desired splits
   const unsigned int IDX_GENERAL_NAME = 2, IDX_SPECIFIC_NAME = 0;
   ros2_knowledge_graph_msgs::msg::Node new_node;
+  ros2_knowledge_graph_msgs::msg::Edge new_edge;
+  ros2_knowledge_graph_msgs::msg::Content object_content;
+  tf2::Stamped<tf2::Transform> object_tf;
+  //tf2::Stamped<tf2::Transform> head2obj;
   for (int i = 0; i < states->name.size(); i++) {
     std::vector<std::string> current_str_v = split(states->name[i], ':');
     // RCLCPP_INFO(get_logger(), "States[%d]: %s:%s:%s", i, current_str_v[0].c_str(), current_str_v[1].c_str(), current_str_v[2].c_str());
@@ -107,6 +111,15 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
       new_node.node_name = current_str_v[0].c_str();
       new_node.node_class = "Object";
       graph_->update_node(new_node);
+      object_tf.setOrigin(tf2::Vector3(states->pose[i].position.x, states->pose[i].position.y, states->pose[i].position.z));
+      RCLCPP_INFO(get_logger(), "At %f,%f,%f", states->pose[i].position.x, states->pose[i].position.y, states->pose[i].position.z);
+      object_tf.setRotation(tf2::Quaternion(0, 0, 0, 1));
+      object_content.type = 11;
+      object_content.tf_value = toMsg(object_tf);
+      new_edge.source_node_id = "tiago";
+      new_edge.target_node_id = current_str_v[0].c_str();
+      new_edge.content = object_content;
+      graph_->update_edge(new_edge);
     }
 
     // Filter models and saves them into a vector

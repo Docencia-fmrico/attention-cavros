@@ -42,7 +42,7 @@ private:
 
   void head_publisher(void);
   void head_state_callback(
-    const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) const;
+  const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) const;
 };
 
 }  // namespace attention_cavros
