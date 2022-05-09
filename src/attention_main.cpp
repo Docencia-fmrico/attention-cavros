@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 #include <memory>
 #include <chrono>
 
@@ -24,17 +23,17 @@ using namespace std::chrono_literals;
 
 int main(int argc, char * argv[])
 {
-  rclcpp::init(argc, argv);
 
   auto tf_node = std::make_shared<attention_cavros::TFNode>("tf_node", 2s);
   auto head_move_node = std::make_shared<attention_cavros::HeadControllerNode>("head_node", 1s);
   auto detector_node = std::make_shared<attention_cavros::DetectorNode>("detector_node", 500ms);
 
   rclcpp::executors::MultiThreadedExecutor executor;
-  // executor.add_node(head_move_node);
-  executor.add_node(detector_node->get_node_base_interface());
+  executor.add_node(head_move_node);
+  //executor.add_node(detector_node->get_node_base_interface());
   // executor.add_node(tf_node);
   executor.spin();
+  //head_move_node->moveHead(75,0);
 
   rclcpp::shutdown();
   return 0;
