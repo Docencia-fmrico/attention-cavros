@@ -31,10 +31,11 @@ int main(int argc, char * argv[])
   auto detector_node = std::make_shared<attention_cavros::DetectorNode>("detector_node", 500ms);
 
   rclcpp::executors::MultiThreadedExecutor executor;
-  // executor.add_node(head_move_node);
-  executor.add_node(detector_node->get_node_base_interface());
+  executor.add_node(head_move_node);
+  //executor.add_node(detector_node->get_node_base_interface());
   // executor.add_node(tf_node);
   executor.spin();
+  //head_move_node->moveHead(75,0);
 
   rclcpp::shutdown();
   return 0;

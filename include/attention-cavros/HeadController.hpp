@@ -17,6 +17,9 @@
 
 #include <string>
 #include <chrono>
+#include <unistd.h>
+#include <iostream>
+//#include <time.hpp>
 
 #include "rclcpp/rclcpp.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
@@ -31,15 +34,19 @@ class HeadControllerNode : public rclcpp::Node
 {
 public:
   HeadControllerNode(const std::string & name, const std::chrono::nanoseconds & rate);
-
+  void moveHead(float yaw, float pitch);
+  
 private:
   rclcpp::Subscription<control_msgs::msg::JointTrajectoryControllerState>::SharedPtr sub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   void head_publisher(void);
-  void head_state_callback(
-    const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) const;
+  void head_state_callback(const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) ;
+  
+  
+  rclcpp::Time start_mov_ ;
+  int i_;
 };
 
 }  // namespace attention_cavros

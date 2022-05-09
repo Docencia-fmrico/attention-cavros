@@ -15,6 +15,8 @@
 #include <string>
 #include "attention-cavros/HeadController.hpp"
 
+using namespace std::chrono_literals;
+
 namespace attention_cavros
 {
 
@@ -31,42 +33,72 @@ HeadControllerNode::HeadControllerNode(
 
   timer_ = create_wall_timer(
     rate, std::bind(&HeadControllerNode::head_publisher, this));
+
+  i_ = 0;
+  start_mov_ = now();
 }
 
 void
 HeadControllerNode::head_publisher(void)
-{
-  RCLCPP_INFO(get_logger(), "Publishing something...");
+{ 
   
-  trajectory_msgs::msg::JointTrajectory command_msg;
-  command_msg.header.stamp = now();
-  //command_msg.joint_names = last_state_->joint_names;
-  command_msg.points.resize(1);
-  command_msg.points[0].positions.resize(2);
-  command_msg.points[0].velocities.resize(2);
-  command_msg.points[0].accelerations.resize(2);
-
-  command_msg.points[0].positions[0] = 0.0;
-  command_msg.points[0].positions[1] = 0.0;
-
-  command_msg.points[0].velocities[0] = 0.1;
-  command_msg.points[0].velocities[1] = 0.1;
-
-  command_msg.points[0].accelerations[0] = 0.1;
-  command_msg.points[0].accelerations[1] = 0.1;
-
-  //command_msg.points[0].time_from_start = rclcpp::Duration(1s);
-
-  pub_->publish(command_msg);
-
+  float angles[5] = {75.0, 25.0, -45, 20, -75};
+  if(this->now() - start_mov_ > rclcpp::Duration(2s)){
+    moveHead(angles[i_],0);
+    i_++;
+    if(i_ == 5) i_ = 0;
+  }
 
 }
 
+void HeadControllerNode::moveHead(float yaw, float pitch) {
+  trajectory_msgs::msg::JointTrajectory message;
+
+  float joint_yaw = yaw * 1.3 / 75;
+  float joint_pitch = pitch * 0.7853 / 90;
+
+  message.header.frame_id = "";
+  message.header.stamp = this->now();
+  message.joint_names = {"head_1_joint", "head_2_joint"};
+                            // yaw         // pitch
+  message.points.resize(1);
+  message.points[0].positions.resize(2);
+  message.points[0].accelerations.resize(2);
+  message.points[0].velocities.resize(2);
+  message.points[0].effort.resize(2);
+
+  message.points[0].positions[0] = joint_yaw;
+  message.points[0].positions[1] = joint_pitch;
+
+  message.points[0].velocities[0] = 0.1;
+  message.points[0].velocities[1] = 0.1;
+
+  message.points[0].accelerations[0] = 0.1;
+  message.points[0].accelerations[1] = 0.1;
+
+  message.points[0].effort[0] = 0.1;
+  message.points[0].effort[1] = 0.1;
+
+  message.points[0].time_from_start = rclcpp::Duration(1s);
+
+  start_mov_ = now();
+  std::cout << "mensje enviado" <<std::endl;
+  pub_->publish(message);
+}
+
+
 void
 HeadControllerNode::head_state_callback(
-  const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) const
+  const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) 
 {
-  RCLCPP_INFO(get_logger(), "Recv head state...");
+  /*
+  std::cout << "AAA" << std::endl;
+  if ( state->error.positions[0] < 0.1 && state->error.positions[1] < 0.1 ) {
+    std::cout << "bb" << std::endl;
+    reached_pos_ = true;
+  }
+  std::cout << "NNNNN" << std::endl;
+  */
 }
 
 }  // namespace attention_cavros
