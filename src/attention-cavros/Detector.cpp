@@ -92,6 +92,8 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
   ros2_knowledge_graph_msgs::msg::Edge new_edge;
   ros2_knowledge_graph_msgs::msg::Content object_content;
   tf2::Stamped<tf2::Transform> object_tf;
+  tf2::Vector3 head_origin;
+  
   //tf2::Stamped<tf2::Transform> head2obj;
   for (int i = 0; i < states->name.size(); i++) {
     std::vector<std::string> current_str_v = split(states->name[i], ':');
@@ -105,14 +107,17 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
       new_node.node_name = "tiago";
       new_node.node_class = "Robot";
       graph_->update_node(new_node);
+      head_origin = tf2::Vector3(states->pose[i].position.x, states->pose[i].position.y, states->pose[i].position.z);
+      RCLCPP_INFO(get_logger(), "Head at %f,%f,%f", states->pose[i].position.x, states->pose[i].position.y, states->pose[i].position.z);
     }
     else if(strcmp(current_str_v[2].c_str(), "link") == 0 && graph_->exist_node("tiago")) {
       RCLCPP_INFO(get_logger(), "Añadido %s", current_str_v[0].c_str());
       new_node.node_name = current_str_v[0].c_str();
       new_node.node_class = "Object";
       graph_->update_node(new_node);
-      object_tf.setOrigin(tf2::Vector3(states->pose[i].position.x, states->pose[i].position.y, states->pose[i].position.z));
       RCLCPP_INFO(get_logger(), "At %f,%f,%f", states->pose[i].position.x, states->pose[i].position.y, states->pose[i].position.z);
+      RCLCPP_INFO(get_logger(), "At %f,%f,%f", states->pose[i].position.x - head_origin[0], states->pose[i].position.y - head_origin[1], states->pose[i].position.z - head_origin[2]);
+      object_tf.setOrigin(tf2::Vector3(states->pose[i].position.x - head_origin[0], states->pose[i].position.y - head_origin[1], states->pose[i].position.z - head_origin[2]));
       object_tf.setRotation(tf2::Quaternion(0, 0, 0, 1));
       object_content.type = 11;
       object_content.tf_value = toMsg(object_tf);
