@@ -21,6 +21,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 #include "control_msgs/msg/joint_trajectory_controller_state.hpp"
+//#include "ros2_knowledge_graph/GraphNode.hpp"
+//#include "ros2_knowledge_graph/graph_utils.hpp"
 
 using std::placeholders::_1;
 
@@ -36,10 +38,11 @@ private:
   rclcpp::Subscription<control_msgs::msg::JointTrajectoryControllerState>::SharedPtr sub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
+  //std::shared_ptr<ros2_knowledge_graph::GraphNode> graph_;
 
   void head_publisher(void);
   void head_state_callback(
-    const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) const;
+  const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) const;
 };
 
 }  // namespace attention_cavros

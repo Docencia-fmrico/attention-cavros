@@ -24,6 +24,9 @@
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "gazebo_msgs/msg/link_states.hpp"
 #include "geometry_msgs/msg/point.hpp"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "ros2_knowledge_graph/GraphNode.hpp"
+#include "ros2_knowledge_graph/graph_utils.hpp"
 
 using std::placeholders::_1;
 
@@ -48,6 +51,7 @@ private:
   rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr sub_;
   rclcpp_lifecycle::LifecyclePublisher<gazebo_msgs::msg::LinkStates>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
+  std::shared_ptr<ros2_knowledge_graph::GraphNode> graph_;
 
   std::chrono::nanoseconds rate_;
 
