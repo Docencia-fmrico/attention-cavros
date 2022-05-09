@@ -126,7 +126,7 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
       new_edge.content = object_content;
       graph_->update_edge(new_edge);
     }
-
+    
     // Filter models and saves them into a vector
     for (int j = 0; j < targets_.size(); j++) {
       if (current_str_v[IDX_GENERAL_NAME] == targets_[j]) {
