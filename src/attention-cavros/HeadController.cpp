@@ -34,24 +34,28 @@ HeadControllerNode::HeadControllerNode(
   timer_ = create_wall_timer(
     rate, std::bind(&HeadControllerNode::head_publisher, this));
 
+
   i_ = 0;
   start_mov_ = now();
 }
 
-void
-HeadControllerNode::head_publisher(void)
+
+
+void HeadControllerNode::head_publisher(void)
 { 
   
-  float angles[5] = {75.0, 25.0, -45, 20, -75};
+  float angles[2] = {90,-90};
   if(this->now() - start_mov_ > rclcpp::Duration(2s)){
-    moveHead(angles[i_],0);
+    tracking(angles[i_],0);
     i_++;
-    if(i_ == 5) i_ = 0;
+    if(i_ == 2) i_ = 0;
   }
 
 }
 
-void HeadControllerNode::moveHead(float yaw, float pitch) {
+void HeadControllerNode::tracking(float yaw, float pitch) {
+
+
   trajectory_msgs::msg::JointTrajectory message;
 
   float joint_yaw = yaw * 1.3 / 75;
@@ -84,7 +88,10 @@ void HeadControllerNode::moveHead(float yaw, float pitch) {
   start_mov_ = now();
   std::cout << "mensje enviado" <<std::endl;
   pub_->publish(message);
+
+
 }
+
 
 
 void

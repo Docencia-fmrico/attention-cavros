@@ -42,7 +42,8 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   void head_publisher(void);
-  void head_state_callback(const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) ;
+  void head_state_callback(const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state);
+  void tracking(float yaw, float pitch);
   
   
   rclcpp::Time start_mov_ ;
