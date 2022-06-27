@@ -1,0 +1,4 @@
+detector_node:
+  ros__parameters:
+    target_objects: ["PotatoChipChair", "Chair", "AdjTable"]
+    detection_distance: 5.0
