@@ -16,9 +16,8 @@
 #include <chrono>
 
 #include "rclcpp/rclcpp.hpp"
-#include "attention-cavros/HeadController.hpp"
-#include "attention-cavros/Detector.hpp"
-#include "attention-cavros/PoseInMap.hpp"
+#include "tracking/HeadController.hpp"
+#include "tracking/PoseInMap.hpp"
 
 using namespace std::chrono_literals;
 
@@ -26,14 +25,12 @@ int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
 
-  auto tf_node = std::make_shared<attention_cavros::TFNode>("tf_node", 2s);
-  auto head_move_node = std::make_shared<attention_cavros::HeadControllerNode>("head_node", 1s);
-  auto detector_node = std::make_shared<attention_cavros::DetectorNode>("detector_node", 500ms);
+  auto tf_node = std::make_shared<tracking::TFNode>("tf_node", 2s);
+  auto head_move_node = std::make_shared<tracking::HeadControllerNode>("head_node", 1s);
 
   rclcpp::executors::MultiThreadedExecutor executor;
-  // executor.add_node(head_move_node);
-  executor.add_node(detector_node->get_node_base_interface());
-  // executor.add_node(tf_node);
+  executor.add_node(head_move_node);
+  executor.add_node(tf_node);
   executor.spin();
 
   rclcpp::shutdown();

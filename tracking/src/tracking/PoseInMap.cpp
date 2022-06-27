@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include <string>
-#include "attention-cavros/PoseInMap.hpp"
+#include "tracking/PoseInMap.hpp"
 
-namespace attention_cavros
+namespace tracking
 {
 
 TFNode::TFNode(const std::string & name, const std::chrono::nanoseconds & rate)
@@ -43,4 +43,4 @@ TFNode::tf_callback(const tf2_msgs::msg::TFMessage::SharedPtr tf) const
   RCLCPP_INFO(get_logger(), "Recv tf's...");
 }
 
-}  // namespace attention_cavros
+}  // namespace tracking

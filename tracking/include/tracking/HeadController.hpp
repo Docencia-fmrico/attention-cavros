@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ATTENTION_CAVROS__HEADCONTROLLER_HPP_
-#define ATTENTION_CAVROS__HEADCONTROLLER_HPP_
+#ifndef TRACKING__HEADCONTROLLER_HPP_
+#define TRACKING__HEADCONTROLLER_HPP_
 
 #include <string>
 #include <chrono>
@@ -31,7 +31,7 @@
 
 using std::placeholders::_1;
 
-namespace attention_cavros
+namespace tracking
 {
 
 class HeadControllerNode : public rclcpp::Node
@@ -46,7 +46,7 @@ private:
   rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr gazebo_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
-  void tracking(void);
+  void scan(void);
   void head_state_callback(const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) ;
   void model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states);
   void moveHead(float yaw, float pitch);
@@ -62,6 +62,6 @@ private:
   std::chrono::nanoseconds rate_;
 };
 
-}  // namespace attention_cavros
+}  // namespace tracking
 
-#endif  // ATTENTION_CAVROS__HEADCONTROLLER_HPP_
+#endif  // TRACKING__HEADCONTROLLER_HPP_

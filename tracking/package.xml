@@ -5,7 +5,7 @@
     schematypens="http://www.w3.org/2001/XMLSchema"?>
 
 <package format="3">
-    <name>attention-cavros</name>
+    <name>tracking</name>
     <version>0.0.1</version>  
     <description>Attention task for Tiago</description>
     <maintainer email="c.sanchezro.2018@alumnos.urjc.es">Cristian Sanchez Rodriguez</maintainer> 

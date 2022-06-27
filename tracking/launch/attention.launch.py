@@ -19,13 +19,13 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    pkg_dir = get_package_share_directory('attention-cavros')
+    pkg_dir = get_package_share_directory('tracking')
     config_dir = os.path.join(pkg_dir, 'config')
     config_file = os.path.join(config_dir, 'detector.yaml')
 
     file_param_node_cmd = Node(
-        package='attention-cavros',
-        executable='attention_main',
+        package='tracking',
+        executable='tracking_main',
         output='screen',
         parameters=[config_file])
 
