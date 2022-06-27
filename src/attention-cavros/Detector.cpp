@@ -24,13 +24,16 @@ namespace attention_cavros
 DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseconds & rate)
 : LifecycleNode(name), rate_(rate)
 {
-  pub_ = create_publisher<gazebo_msgs::msg::LinkStates>("/near_objects/filtered", 10);
+  // creamos un publicador de los objetos ya filtrados (?) y un subscriptor a link_states (objetos en el escenario)
+  //pub_ = create_publisher<gazebo_msgs::msg::LinkStates>("/near_objects/filtered", 10);
   sub_ = create_subscription<gazebo_msgs::msg::LinkStates>(
     "/gazebo/link_states", 10, std::bind(&DetectorNode::model_states_callback, this, _1));
 
+  // declaramos los parametros que utilizaremos luego
   declare_parameter("detection_distance", 0.0);
   declare_parameter("target_objects");
 
+  // creamos un knowledge graph
   auto rclcpp_node = rclcpp::Node::make_shared("Graph");
   graph_ = std::make_shared<ros2_knowledge_graph::GraphNode>(rclcpp_node);
 }
@@ -43,6 +46,7 @@ DetectorNode::on_configure(const rclcpp_lifecycle::State & state)
 {
   RCLCPP_INFO(get_logger(), "[%s] On_configure desde [%s]", get_name(), state.label().c_str());
 
+  // guardamos los parametros del fichero de configuración
   rclcpp::Parameter targets_param_format("target_objects", std::vector<std::string>({}));
   get_parameter("target_objects", targets_param_format);
   targets_ = targets_param_format.as_string_array();
@@ -56,10 +60,10 @@ DetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 {
   RCLCPP_INFO(get_logger(), "[%s] On_activate desde [%s]", get_name(), state.label().c_str());
 
-  timer_ = create_wall_timer(
-    rate_, std::bind(&DetectorNode::near_objects_publisher, this));
-
-  pub_->on_activate();
+  // comenzamos a ejecutar near_object_publisher (?)
+  //timer_ = create_wall_timer(
+  //  rate_, std::bind(&DetectorNode::near_objects_publisher, this));
+  //pub_->on_activate();
 
   return CallbackReturnT::SUCCESS;
 }
@@ -69,8 +73,9 @@ DetectorNode::on_deactivate(const rclcpp_lifecycle::State & state)
 {
   RCLCPP_INFO(get_logger(), "[%s] On_deactivate desde [%s]", get_name(), state.label().c_str());
 
-  pub_->on_deactivate();
-  timer_ = nullptr;
+  // terminamos con la ejecucion de near_object_publisher
+  //pub_->on_deactivate();
+  //timer_ = nullptr;
 
   return CallbackReturnT::SUCCESS;
 }
@@ -78,9 +83,9 @@ DetectorNode::on_deactivate(const rclcpp_lifecycle::State & state)
 void
 DetectorNode::near_objects_publisher(void)
 {
-  if (pub_->is_activated()) {
-    RCLCPP_INFO(get_logger(), "Publishing detection...");
-  }
+  //if (pub_->is_activated()) {
+  //  RCLCPP_INFO(get_logger(), "Publishing detection...");
+  //}
 }
 
 void
@@ -88,6 +93,7 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
 {
   // Indexes of the desired splits
   const unsigned int IDX_GENERAL_NAME = 2, IDX_SPECIFIC_NAME = 0;
+
   ros2_knowledge_graph_msgs::msg::Node new_node;
   ros2_knowledge_graph_msgs::msg::Edge new_edge;
   ros2_knowledge_graph_msgs::msg::Content object_content;
