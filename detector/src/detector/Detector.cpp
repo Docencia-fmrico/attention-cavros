@@ -16,9 +16,9 @@
 #include <vector>
 #include <cmath>
 
-#include "attention-cavros/Detector.hpp"
+#include "detector/Detector.hpp"
 
-namespace attention_cavros
+namespace detector
 {
 
 DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseconds & rate)
@@ -188,4 +188,4 @@ DetectorNode::split(std::string str, char del)
   return result;
 }
 
-}  // namespace attention_cavros
+}  // namespace detector

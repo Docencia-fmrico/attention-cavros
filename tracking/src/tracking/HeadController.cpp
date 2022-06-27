@@ -13,13 +13,13 @@
 // limitations under the License.
 
 #include <string>
-#include "attention-cavros/HeadController.hpp"
+#include "tracking/HeadController.hpp"
 
 #define PI 3.14159
 
 using namespace std::chrono_literals;
 
-namespace attention_cavros
+namespace tracking
 {
 
 HeadControllerNode::HeadControllerNode(
@@ -37,7 +37,7 @@ HeadControllerNode::HeadControllerNode(
     "/gazebo/link_states", 10, std::bind(&HeadControllerNode::model_states_callback, this, _1));
 
   timer_ = create_wall_timer(
-    rate, std::bind(&HeadControllerNode::tracking, this));
+    rate, std::bind(&HeadControllerNode::scan, this));
 
   i_ = 2;
 
@@ -45,7 +45,7 @@ HeadControllerNode::HeadControllerNode(
   no_objects_ = true;
 }
 
-void HeadControllerNode::tracking(void)
+void HeadControllerNode::scan(void)
 { 
   float angles[2] = {90,-90};
 
@@ -173,4 +173,4 @@ HeadControllerNode::head_state_callback(
   */
 }
 
-}  // namespace attention_cavros
+}  // namespace tracking

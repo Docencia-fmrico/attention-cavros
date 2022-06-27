@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ATTENTION_CAVROS__DETECTOR_HPP_
-#define ATTENTION_CAVROS__DETECTOR_HPP_
+#ifndef DETECTOR__DETECTOR_HPP_
+#define DETECTOR__DETECTOR_HPP_
 
 #include <string>
 #include <chrono>
@@ -30,7 +30,7 @@
 
 using std::placeholders::_1;
 
-namespace attention_cavros
+namespace detector
 {
 
 class DetectorNode : public rclcpp_lifecycle::LifecycleNode
@@ -65,6 +65,6 @@ private:
   std::vector<std::string> split(std::string str, char del);
 };
 
-}  // namespace attention_cavros
+}  // namespace detector
 
-#endif  // ATTENTION_CAVROS__DETECTOR_HPP_
+#endif  // DETECTOR__DETECTOR_HPP_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ATTENTION_CAVROS__POSEINMAP_HPP_
-#define ATTENTION_CAVROS__POSEINMAP_HPP_
+#ifndef TRACKING__POSEINMAP_HPP_
+#define TRACKING__POSEINMAP_HPP_
 
 #include <string>
 #include <chrono>
@@ -23,7 +23,7 @@
 
 using std::placeholders::_1;
 
-namespace attention_cavros
+namespace tracking
 {
 
 class TFNode : public rclcpp::Node
@@ -41,6 +41,6 @@ private:
   void tf_callback(const tf2_msgs::msg::TFMessage::SharedPtr tf) const;
 };
 
-}  // namespace attention_cavros
+}  // namespace tracking
 
-#endif  // ATTENTION_CAVROS__POSEINMAP_HPP_
+#endif  // TRACKING__POSEINMAP_HPP_

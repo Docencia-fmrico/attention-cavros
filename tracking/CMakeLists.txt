@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(attention-cavros)
+project(tracking)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE DEBUG)
@@ -26,20 +26,20 @@ set(dependencies
 include_directories(include)
 
 add_library(${PROJECT_NAME} SHARED
-    src/attention-cavros/HeadController.cpp
-    src/attention-cavros/Detector.cpp
-    src/attention-cavros/PoseInMap.cpp
+    src/tracking/HeadController.cpp
+    src/tracking/PoseInMap.cpp
 )
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 
-add_executable(attention_main src/attention_main.cpp)
-target_link_libraries(attention_main ${PROJECT_NAME})
+add_executable(tracking_main src/tracking_main.cpp)
+target_link_libraries(tracking_main ${PROJECT_NAME})
 
 install(DIRECTORY include config launch
     DESTINATION share/${PROJECT_NAME}
 )
 
 install(TARGETS
+    tracking_main
     ${PROJECT_NAME}
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
