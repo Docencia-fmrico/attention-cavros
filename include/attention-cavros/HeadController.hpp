@@ -17,12 +17,17 @@
 
 #include <string>
 #include <chrono>
+#include <unistd.h>
+#include <iostream>
+//#include <time.hpp>
 
 #include "rclcpp/rclcpp.hpp"
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 #include "control_msgs/msg/joint_trajectory_controller_state.hpp"
-//#include "ros2_knowledge_graph/GraphNode.hpp"
-//#include "ros2_knowledge_graph/graph_utils.hpp"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+
+#include "gazebo_msgs/msg/link_states.hpp"
+
 
 using std::placeholders::_1;
 
@@ -33,16 +38,28 @@ class HeadControllerNode : public rclcpp::Node
 {
 public:
   HeadControllerNode(const std::string & name, const std::chrono::nanoseconds & rate);
+  //void moveHead(float yaw, float pitch);
 
 private:
   rclcpp::Subscription<control_msgs::msg::JointTrajectoryControllerState>::SharedPtr sub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_;
+  rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr gazebo_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
-  //std::shared_ptr<ros2_knowledge_graph::GraphNode> graph_;
 
-  void head_publisher(void);
-  void head_state_callback(
-  const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) const;
+  void tracking(void);
+  void head_state_callback(const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) ;
+  void model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states);
+  void moveHead(float yaw, float pitch);
+
+  rclcpp::Time start_mov_ ;
+  tf2::Stamped<tf2::Transform> object_tf;
+  int i_;
+  bool no_objects_;
+  std::string object_;
+
+  std::vector<std::string> split(std::string str, char del);
+  std::vector<std::string> targets_;
+  std::chrono::nanoseconds rate_;
 };
 
 }  // namespace attention_cavros

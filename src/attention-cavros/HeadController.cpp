@@ -100,7 +100,7 @@ void
 HeadControllerNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states)
 { 
   // ande va esto
-  object_tf = grafo_->get_edge("tiago",object_,11);
+  //object_tf = grafo_->get_edge("tiago",object_,11);
 
   const unsigned int IDX_GENERAL_NAME = 2;
   for (int i = 0; i < states->name.size(); i++) {
@@ -121,7 +121,7 @@ HeadControllerNode::model_states_callback(const gazebo_msgs::msg::LinkStates::Sh
         // 2nd Filter, if object inside detection radius, added.
         if (circle_eq <= pow(5, 2)) {
           
-          tf2::Vector3 pos = object_tf_.getOrigin();
+          tf2::Vector3 pos = object_tf.getOrigin();
           float angle = 360 * atan(pos[1]/pos[0])/ (2*PI);
           //std::cout << pos[0]<< "," << pos[1] << " : angle-> " << angle << std::endl;
           
