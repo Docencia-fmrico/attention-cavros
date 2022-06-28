@@ -27,6 +27,7 @@ int main(int argc, char * argv[])
 
   //auto tf_node = std::make_shared<tracking::TFNode>("tf_node", 2s);
   auto head_move_node = std::make_shared<tracking::HeadControllerNode>("head_node", 1s);
+  head_move_node->init_grafLuisFonsi();
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(head_move_node);

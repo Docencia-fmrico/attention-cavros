@@ -28,6 +28,9 @@
 
 #include "gazebo_msgs/msg/link_states.hpp"
 
+#include "ros2_knowledge_graph/GraphNode.hpp"
+#include "ros2_knowledge_graph/graph_utils.hpp"
+
 
 using std::placeholders::_1;
 
@@ -38,18 +41,23 @@ class HeadControllerNode : public rclcpp::Node
 {
 public:
   HeadControllerNode(const std::string & name, const std::chrono::nanoseconds & rate);
-  //void moveHead(float yaw, float pitch);
+  void init_grafLuisFonsi(void);
 
 private:
   rclcpp::Subscription<control_msgs::msg::JointTrajectoryControllerState>::SharedPtr sub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_;
-  rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr gazebo_sub_;
+  //rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr gazebo_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   void scan(void);
   void head_state_callback(const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) ;
-  void model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states);
+  //void model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states);
   void moveHead(float yaw, float pitch);
+  void HeadControl(void);
+  
+  void init_graph(void);
+  void add_node(void);
+  void add_edge(void);
 
   rclcpp::Time start_mov_ ;
   tf2::Stamped<tf2::Transform> object_tf;
@@ -63,6 +71,8 @@ private:
   std::vector<std::string> split(std::string str, char del);
   std::vector<std::string> targets_;
   std::chrono::nanoseconds rate_;
+
+  std::shared_ptr<ros2_knowledge_graph::GraphNode> graph_;
 };
 
 }  // namespace tracking
