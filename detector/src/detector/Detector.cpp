@@ -32,10 +32,12 @@ DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseco
   // declaramos los parametros que utilizaremos luego
   declare_parameter("detection_distance", 0.0);
   declare_parameter("target_objects");
+}
 
-  // creamos un knowledge graph
-  auto rclcpp_node = rclcpp::Node::make_shared("Graph");
-  graph_ = std::make_shared<ros2_knowledge_graph::GraphNode>(rclcpp_node);
+void
+DetectorNode::init_graph(void)
+{
+  graph_ = std::make_shared<ros2_knowledge_graph::GraphNode>(shared_from_this());
 }
 
 using CallbackReturnT =
@@ -46,12 +48,16 @@ DetectorNode::on_configure(const rclcpp_lifecycle::State & state)
 {
   RCLCPP_INFO(get_logger(), "[%s] On_configure desde [%s]", get_name(), state.label().c_str());
 
+  init_graph();
   // guardamos los parametros del fichero de configuración
   rclcpp::Parameter targets_param_format("target_objects", std::vector<std::string>({}));
   get_parameter("target_objects", targets_param_format);
   targets_ = targets_param_format.as_string_array();
   detection_dist_ = get_parameter("detection_distance").get_value<double>();
-
+  RCLCPP_INFO(get_logger(), "[%f] Detection Dist", detection_dist_);
+  for (int j = 0; j < targets_.size(); j++) {
+    RCLCPP_INFO(get_logger(), "[%s] Targets[%d]", targets_[j].c_str(), j);
+  }
   return CallbackReturnT::SUCCESS;
 }
 
@@ -99,16 +105,16 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
   ros2_knowledge_graph_msgs::msg::Content object_content;
   tf2::Stamped<tf2::Transform> object_tf;
   tf2::Vector3 head_origin;
-  
+  RCLCPP_INFO(get_logger(), "Inicio del Callback");
   //tf2::Stamped<tf2::Transform> head2obj;
   for (int i = 0; i < states->name.size(); i++) {
     std::vector<std::string> current_str_v = split(states->name[i], ':');
-    // RCLCPP_INFO(get_logger(), "States[%d]: %s:%s:%s", i, current_str_v[0].c_str(), current_str_v[1].c_str(), current_str_v[2].c_str());
+    RCLCPP_INFO(get_logger(), "States[%d]: %s:%s:%s", i, current_str_v[0].c_str(), current_str_v[1].c_str(), current_str_v[2].c_str());
     // RCLCPP_INFO(get_logger(), "Comparing %s with tiago. Result:%d", current_str_v[0].c_str(), strcmp(current_str_v[0].c_str(), "tiago") == 0);
     // RCLCPP_INFO(get_logger(), "Comparing %s with head_1_link. Result: %d", current_str_v[2].c_str(), strcmp(current_str_v[2].c_str(), "head_1_link") == 0);
     // RCLCPP_INFO(get_logger(), "Result: %d", strcmp(current_str_v[0].c_str(), "tiago") == 0 && strcmp(current_str_v[2].c_str(), "head_1_link") == 0);
     //RCLCPP_INFO(get_logger(), "Comparing %s with link and %s with %d", current_str_v[2].c_str(), graph_->exist_node("tiago"));
-    if (strcmp(current_str_v[0].c_str(), "tiago") == 0 && strcmp(current_str_v[2].c_str(), "head_1_link") == 0) {
+    if (current_str_v[0].c_str() == "tiago" && current_str_v[2].c_str() == "head_1_link") {
       RCLCPP_INFO(get_logger(), "Añadido %s", current_str_v[0].c_str());
       new_node.node_name = "tiago";
       new_node.node_class = "Robot";
@@ -132,19 +138,29 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
       new_edge.content = object_content;
       graph_->update_edge(new_edge);
     }
+    // SUSTITUIR POR LA POSE DEL ROBOT CON RESPECTO AL MAPA
+    int robot_x = 0, robot_y = 0;
+    double circle_eq;
 
+    circle_eq = powf(states->pose[i].position.x - robot_x, 2) + 
+                powf(states->pose[i].position.y - robot_y, 2);
+
+    // 2nd Filter, if object inside detection radius, added.
+    if (circle_eq <= powf(detection_dist_, 2)) {
+      if ((targets_.size() != 0) && (find_targets(targets_, current_str_v[0].c_str()) == -1))
+        break;
+      object_content.type = 4;
+      object_content.string_value = "able_to_see";
+      new_edge.source_node_id = "tiago";
+      new_edge.target_node_id = current_str_v[0].c_str();
+      new_edge.content = object_content;
+      graph_->update_edge(new_edge);
+    }
+    /*
     // Filter models and saves them into a vector
     for (int j = 0; j < targets_.size(); j++) {
       if (current_str_v[IDX_GENERAL_NAME] == targets_[j]) {
-        // SUSTITUIR POR LA POSE DEL ROBOT CON RESPECTO AL MAPA
-        int robot_x = 0, robot_y = 0;
-        double circle_eq;
-
-        circle_eq = pow(states->pose[i].position.x - robot_x, 2) +
-          pow(states->pose[i].position.y - robot_y, 2);
-
-        // 2nd Filter, if object inside detection radius, added.
-        if (circle_eq <= pow(detection_dist_, 2)) {
+        
           geometry_msgs::msg::Point current_point;
 
           current_point.x = states->pose[i].position.x;
@@ -156,8 +172,9 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
         }
       }
     }
+    */
   }
-
+  /*
   // Debug
   for (int i = 0; i < finded_targets_.size(); i++) {
     RCLCPP_INFO(get_logger(), "name: %s", finded_targets_[i].c_str());
@@ -168,6 +185,7 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
 
   finded_targets_.clear();
   finded_coords_.clear();
+  */
 }
 
 std::vector<std::string>
@@ -186,6 +204,16 @@ DetectorNode::split(std::string str, char del)
   }
   result.push_back(temp);
   return result;
+}
+
+int
+DetectorNode::find_targets(std::vector<std::string> targets, std::string to_find){
+  for (int j = 0; j < targets.size(); j++) {
+    if (to_find == targets[j]) {
+      return j;
+    }
+  }
+  return -1;
 }
 
 }  // namespace detector

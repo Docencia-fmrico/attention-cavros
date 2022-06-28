@@ -33,7 +33,7 @@ ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 add_executable(detector_main src/detector_main.cpp)
 target_link_libraries(detector_main ${PROJECT_NAME})
 
-install(DIRECTORY include
+install(DIRECTORY include config launch
     DESTINATION share/${PROJECT_NAME}
 )
 

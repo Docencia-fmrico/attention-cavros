@@ -34,7 +34,7 @@ ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 add_executable(tracking_main src/tracking_main.cpp)
 target_link_libraries(tracking_main ${PROJECT_NAME})
 
-install(DIRECTORY include config launch
+install(DIRECTORY include
     DESTINATION share/${PROJECT_NAME}
 )
 

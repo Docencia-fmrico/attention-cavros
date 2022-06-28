@@ -19,13 +19,13 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    pkg_dir = get_package_share_directory('tracking')
+    pkg_dir = get_package_share_directory('detector')
     config_dir = os.path.join(pkg_dir, 'config')
     config_file = os.path.join(config_dir, 'detector.yaml')
 
     file_param_node_cmd = Node(
-        package='tracking',
-        executable='tracking_main',
+        package='detector',
+        executable='detector_main',
         output='screen',
         parameters=[config_file])
 

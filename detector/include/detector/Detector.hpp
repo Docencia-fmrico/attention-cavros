@@ -58,11 +58,13 @@ private:
   double detection_dist_;
 
   std::vector<std::string> targets_;
-  std::vector<std::string> finded_targets_;
-  std::vector<geometry_msgs::msg::Point> finded_coords_;
+  //std::vector<std::string> finded_targets_;
+  //std::vector<geometry_msgs::msg::Point> finded_coords_;
 
   void near_objects_publisher(void);
   std::vector<std::string> split(std::string str, char del);
+  int find_targets(std::vector<std::string> targets, std::string to_find);
+  void init_graph(void);
 };
 
 }  // namespace detector
