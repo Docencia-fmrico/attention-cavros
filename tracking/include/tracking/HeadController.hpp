@@ -53,8 +53,11 @@ private:
 
   rclcpp::Time start_mov_ ;
   tf2::Stamped<tf2::Transform> object_tf;
-  int i_;
+
   bool no_objects_;
+  bool reached_pos_;
+  float target_angle_;
+  bool start_scan_;
   std::string object_;
 
   std::vector<std::string> split(std::string str, char del);

@@ -26,37 +26,42 @@ HeadControllerNode::HeadControllerNode(
   const std::string & name, const std::chrono::nanoseconds & rate)
 : Node(name)
 {
+  
   sub_ = create_subscription<control_msgs::msg::JointTrajectoryControllerState>(
     "/head_controller/state", 10,
     std::bind(&HeadControllerNode::head_state_callback, this, _1));
-
+  
   pub_ = create_publisher<trajectory_msgs::msg::JointTrajectory>(
     "/head_controller/joint_trajectory", 10);
 
+  /*
   gazebo_sub_ = create_subscription<gazebo_msgs::msg::LinkStates>(
     "/gazebo/link_states", 10, std::bind(&HeadControllerNode::model_states_callback, this, _1));
+  */
 
   timer_ = create_wall_timer(
     rate, std::bind(&HeadControllerNode::scan, this));
 
-  i_ = 2;
-
   start_mov_ = now();
   no_objects_ = true;
+  reached_pos_ = true;
+  start_scan_ = true;
 }
 
 void HeadControllerNode::scan(void)
 { 
-  float angles[2] = {90,-90};
+  if(start_scan_) {
+    start_scan_ = false;
+    target_angle_ = 90;
+  }
 
   if(no_objects_) {
-    if(this->now() - start_mov_ > rclcpp::Duration(2s)){
-      moveHead(angles[i_],0);
-      i_++;
-      if(i_ == 2) i_ = 0;
+    if(reached_pos_) {
+      target_angle_ = target_angle_ * -1;
+      moveHead(target_angle_,0);
+      reached_pos_ = false;
     }
   }
-  
 }
 
 void HeadControllerNode::moveHead(float yaw, float pitch) {
@@ -163,14 +168,11 @@ void
 HeadControllerNode::head_state_callback(
   const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) 
 {
-  /*
-  std::cout << "AAA" << std::endl;
-  if ( state->error.positions[0] < 0.1 && state->error.positions[1] < 0.1 ) {
-    std::cout << "bb" << std::endl;
+  float error = fabs(state->actual.positions[0] - (target_angle_*PI/180));
+  if ( error < 0.27 ) {
     reached_pos_ = true;
   }
-  std::cout << "NNNNN" << std::endl;
-  */
+  
 }
 
 }  // namespace tracking
