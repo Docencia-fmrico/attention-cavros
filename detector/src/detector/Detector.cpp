@@ -21,8 +21,8 @@
 namespace detector
 {
 
-DetectorNode::DetectorNode(const std::string & name, const std::chrono::nanoseconds & rate)
-: LifecycleNode(name), rate_(rate)
+DetectorNode::DetectorNode(const std::string & name)
+: LifecycleNode(name)
 {
   // declaramos los parametros que utilizaremos luego
   declare_parameter("detection_distance", 0.0);
@@ -44,17 +44,15 @@ DetectorNode::on_configure(const rclcpp_lifecycle::State & state)
   RCLCPP_INFO(get_logger(), "[%s] On_configure desde [%s]", get_name(), state.label().c_str());
 
   init_graph();
-  sub_ = create_subscription<gazebo_msgs::msg::LinkStates>(
-    "/gazebo/link_states", 10, std::bind(&DetectorNode::model_states_callback, this, _1));
   // guardamos los parametros del fichero de configuración
   rclcpp::Parameter targets_param_format("target_objects", std::vector<std::string>({}));
   get_parameter("target_objects", targets_param_format);
   targets_ = targets_param_format.as_string_array();
   detection_dist_ = get_parameter("detection_distance").get_value<double>();
   RCLCPP_INFO(get_logger(), "[%f] Detection Dist", detection_dist_);
-  //if (targets_[0] == "Empty"){
-  //  targets_.erase("Empty");
-  //}
+  if (targets_[0] == "Empty"){
+    targets_.clear();
+  }
   for (int j = 0; j < targets_.size(); j++) {
     RCLCPP_INFO(get_logger(), "[%s] Targets[%d]", targets_[j].c_str(), j);
   }
@@ -66,10 +64,8 @@ DetectorNode::on_activate(const rclcpp_lifecycle::State & state)
 {
   RCLCPP_INFO(get_logger(), "[%s] On_activate desde [%s]", get_name(), state.label().c_str());
 
-  // comenzamos a ejecutar near_object_publisher (?)
-  //timer_ = create_wall_timer(
-  //  rate_, std::bind(&DetectorNode::near_objects_publisher, this));
-  //pub_->on_activate();
+  sub_ = create_subscription<gazebo_msgs::msg::LinkStates>(
+    "/gazebo/link_states", 10, std::bind(&DetectorNode::model_states_callback, this, _1));
 
   return CallbackReturnT::SUCCESS;
 }
@@ -79,19 +75,9 @@ DetectorNode::on_deactivate(const rclcpp_lifecycle::State & state)
 {
   RCLCPP_INFO(get_logger(), "[%s] On_deactivate desde [%s]", get_name(), state.label().c_str());
 
-  // terminamos con la ejecucion de near_object_publisher
-  //pub_->on_deactivate();
-  //timer_ = nullptr;
+  sub_ = nullptr;
 
   return CallbackReturnT::SUCCESS;
-}
-
-void
-DetectorNode::near_objects_publisher(void)
-{
-  //if (pub_->is_activated()) {
-  //  RCLCPP_INFO(get_logger(), "Publishing detection...");
-  //}
 }
 
 void
@@ -105,14 +91,8 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
   ros2_knowledge_graph_msgs::msg::Content object_content;
   tf2::Stamped<tf2::Transform> object_tf;
   tf2::Vector3 head_origin;
-  RCLCPP_INFO(get_logger(), "Inicio del Callback");
-  //tf2::Stamped<tf2::Transform> head2obj;
   for (int i = 0; i < states->name.size(); i++) {
     std::vector<std::string> current_str_v = split(states->name[i], ':');
-    RCLCPP_INFO(get_logger(), "States[%d]: %s:%s:%s", i, current_str_v[0].c_str(), current_str_v[1].c_str(), current_str_v[2].c_str());
-    // RCLCPP_INFO(get_logger(), "Comparing %s with head_1_link. Result: %d", current_str_v[2].c_str(), strcmp(current_str_v[2].c_str(), "head_1_link") == 0);
-    // RCLCPP_INFO(get_logger(), "Result: %d", strcmp(current_str_v[0].c_str(), "tiago") == 0 && strcmp(current_str_v[2].c_str(), "head_1_link") == 0);
-    //RCLCPP_INFO(get_logger(), "Comparing %s with link and %s with %d", current_str_v[2].c_str(), graph_->exist_node("tiago"));
     if ((current_str_v[0] == "tiago") && (current_str_v[2] == "head_1_link")) {
       RCLCPP_INFO(get_logger(), "Añadido %s", current_str_v[0].c_str());
       new_node.node_name = "tiago";
@@ -137,7 +117,7 @@ DetectorNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPt
       new_edge.content = object_content;
       graph_->update_edge(new_edge);
       // SUSTITUIR POR LA POSE DEL ROBOT CON RESPECTO AL MAPA
-      int robot_x = 0, robot_y = 0;
+      int robot_x = head_origin[0], robot_y = head_origin[2];
       double circle_eq;
 
       circle_eq = powf(states->pose[i].position.x - robot_x, 2) + 

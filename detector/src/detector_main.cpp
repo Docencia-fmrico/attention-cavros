@@ -24,7 +24,7 @@ int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
 
-  auto detector_node = std::make_shared<detector::DetectorNode>("detector_node", 500ms);
+  auto detector_node = std::make_shared<detector::DetectorNode>("detector_node");
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(detector_node->get_node_base_interface());

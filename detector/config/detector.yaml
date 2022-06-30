@@ -1,5 +1,5 @@
 detector_node:
   ros__parameters:
-    target_objects: ["PotatoChipChair", "Chair", "AdjTable", "cabinet", "bookshelf_0"]
-    #target_objects: ["Empty"]
-    detection_distance: 20.0
+    #target_objects: ["PotatoChipChair", "Chair", "AdjTable", "cabinet", "bookshelf_0"]
+    target_objects: ["Empty"]
+    detection_distance: 5.0
