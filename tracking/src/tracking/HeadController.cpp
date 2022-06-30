@@ -46,16 +46,12 @@ HeadControllerNode::HeadControllerNode(
 
 }
 
-void HeadControllerNode::init_grafLuisFonsi(void){
-  init_graph();
-  add_node();
-  add_edge();
-}
-
 void
 HeadControllerNode::init_graph(void)
 {
   graph_ = std::make_shared<ros2_knowledge_graph::GraphNode>(shared_from_this());
+  add_node();
+  add_edge();
 }
 
 void
@@ -81,6 +77,7 @@ HeadControllerNode::add_edge(void)
 {
   ros2_knowledge_graph_msgs::msg::Edge new_edge;
   ros2_knowledge_graph_msgs::msg::Content object_content ;
+  tf2::Stamped<tf2::Transform> object_tf;
 
   new_edge.source_node_id = "tiago";
   new_edge.target_node_id = "chair";
@@ -90,11 +87,19 @@ HeadControllerNode::add_edge(void)
   new_edge.content = object_content;
   graph_->update_edge(new_edge);
 
+  object_tf.setOrigin(tf2::Vector3(1,1,0));
+  object_tf.setRotation(tf2::Quaternion(0, 0, 0, 1));
+  object_content.type = TF;
+  object_content.tf_value = toMsg(object_tf);
+  new_edge.content = object_content;
+  graph_->update_edge(new_edge);
+
+
   new_edge.source_node_id = "tiago";
   new_edge.target_node_id = "can";
 
   object_content.type = STRING;
-  object_content.string_value = "able_to_see";
+  object_content.string_value = " not_able_to_see";
   new_edge.content = object_content;
   graph_->update_edge(new_edge);
 }
@@ -103,14 +108,18 @@ void HeadControllerNode::HeadControl(void) {
 
   std::vector<ros2_knowledge_graph_msgs::msg::Edge> edges = graph_->get_edges();
 
-  for ( int i = 0; i < edges.size() ; i++) {
+  for (int i = 0; i < edges.size() ; i++) {
     if (edges[i].content.type == STRING && edges[i].content.string_value == "able_to_see"){
-      std::cout << edges[i].target_node_id << std::endl;
+      std::cout << "Able to see: " <<  edges[i].target_node_id << std::endl;
+
     } else {
       std::cout << "SCAN" << std::endl;
       scan();
+      return;
     }
   }
+
+
 }
 
 void HeadControllerNode::scan(void)
@@ -120,13 +129,12 @@ void HeadControllerNode::scan(void)
     target_angle_ = 90;
   }
 
-  if(no_objects_) {
-    if(reached_pos_) {
-      target_angle_ = target_angle_ * -1;
-      moveHead(target_angle_,0);
-      reached_pos_ = false;
-    }
+  if(reached_pos_) {
+    target_angle_ = target_angle_ * -1;
+    moveHead(target_angle_,0);
+    reached_pos_ = false;
   }
+
 }
 
 void HeadControllerNode::moveHead(float yaw, float pitch) {

@@ -41,7 +41,7 @@ class HeadControllerNode : public rclcpp::Node
 {
 public:
   HeadControllerNode(const std::string & name, const std::chrono::nanoseconds & rate);
-  void init_grafLuisFonsi(void);
+  void init_graph(void);
 
 private:
   rclcpp::Subscription<control_msgs::msg::JointTrajectoryControllerState>::SharedPtr sub_;
@@ -55,7 +55,6 @@ private:
   void moveHead(float yaw, float pitch);
   void HeadControl(void);
   
-  void init_graph(void);
   void add_node(void);
   void add_edge(void);
 
