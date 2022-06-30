@@ -16,6 +16,8 @@
 #include "tracking/HeadController.hpp"
 
 #define PI 3.14159
+#define STRING 4
+#define TF 11
 
 using namespace std::chrono_literals;
 
@@ -26,45 +28,120 @@ HeadControllerNode::HeadControllerNode(
   const std::string & name, const std::chrono::nanoseconds & rate)
 : Node(name)
 {
+  
   sub_ = create_subscription<control_msgs::msg::JointTrajectoryControllerState>(
     "/head_controller/state", 10,
     std::bind(&HeadControllerNode::head_state_callback, this, _1));
-
+  
   pub_ = create_publisher<trajectory_msgs::msg::JointTrajectory>(
     "/head_controller/joint_trajectory", 10);
 
-  gazebo_sub_ = create_subscription<gazebo_msgs::msg::LinkStates>(
-    "/gazebo/link_states", 10, std::bind(&HeadControllerNode::model_states_callback, this, _1));
-
   timer_ = create_wall_timer(
-    rate, std::bind(&HeadControllerNode::scan, this));
-
-  i_ = 2;
+    rate, std::bind(&HeadControllerNode::HeadControl, this));
 
   start_mov_ = now();
   no_objects_ = true;
+  reached_pos_ = true;
+  start_scan_ = true;
+
+}
+
+void
+HeadControllerNode::init_graph(void)
+{
+  graph_ = std::make_shared<ros2_knowledge_graph::GraphNode>(shared_from_this());
+  add_node();
+  add_edge();
+}
+
+void
+HeadControllerNode::add_node(void)
+{
+  ros2_knowledge_graph_msgs::msg::Node new_node;
+
+  new_node.node_name = "chair";
+  new_node.node_class = "object";
+  graph_->update_node(new_node);
+
+  new_node.node_name = "tiago";
+  new_node.node_class = "Robot";
+  graph_->update_node(new_node);
+
+  new_node.node_name = "can";
+  new_node.node_class = "object";
+  graph_->update_node(new_node);
+}
+
+void
+HeadControllerNode::add_edge(void)
+{
+  ros2_knowledge_graph_msgs::msg::Edge new_edge;
+  ros2_knowledge_graph_msgs::msg::Content object_content ;
+  tf2::Stamped<tf2::Transform> object_tf;
+
+  new_edge.source_node_id = "tiago";
+  new_edge.target_node_id = "chair";
+
+  object_content.type = STRING;
+  object_content.string_value = "able_to_see";
+  new_edge.content = object_content;
+  graph_->update_edge(new_edge);
+
+  object_tf.setOrigin(tf2::Vector3(1,1,0));
+  object_tf.setRotation(tf2::Quaternion(0, 0, 0, 1));
+  object_content.type = TF;
+  object_content.tf_value = toMsg(object_tf);
+  new_edge.content = object_content;
+  graph_->update_edge(new_edge);
+
+
+  new_edge.source_node_id = "tiago";
+  new_edge.target_node_id = "can";
+
+  object_content.type = STRING;
+  object_content.string_value = " not_able_to_see";
+  new_edge.content = object_content;
+  graph_->update_edge(new_edge);
+}
+
+void HeadControllerNode::HeadControl(void) {
+
+  std::vector<ros2_knowledge_graph_msgs::msg::Edge> edges = graph_->get_edges();
+
+  for (int i = 0; i < edges.size() ; i++) {
+    if (edges[i].content.type == STRING && edges[i].content.string_value == "able_to_see"){
+      std::cout << "Able to see: " <<  edges[i].target_node_id << std::endl;
+
+    } else {
+      std::cout << "SCAN" << std::endl;
+      scan();
+      return;
+    }
+  }
+
+
 }
 
 void HeadControllerNode::scan(void)
 { 
-  float angles[2] = {90,-90};
-
-  if(no_objects_) {
-    if(this->now() - start_mov_ > rclcpp::Duration(2s)){
-      moveHead(angles[i_],0);
-      i_++;
-      if(i_ == 2) i_ = 0;
-    }
+  if(start_scan_) {
+    start_scan_ = false;
+    target_angle_ = 90;
   }
-  
+
+  if(reached_pos_) {
+    target_angle_ = target_angle_ * -1;
+    moveHead(target_angle_,0);
+    reached_pos_ = false;
+  }
+
 }
 
 void HeadControllerNode::moveHead(float yaw, float pitch) {
 
-
   trajectory_msgs::msg::JointTrajectory message;
 
-  float joint_yaw = yaw * 1.3 / 75;
+  float joint_yaw = yaw * (1.3 / 75);
   float joint_pitch = pitch * 0.7853 / 90;
 
   message.header.frame_id = "";
@@ -92,10 +169,12 @@ void HeadControllerNode::moveHead(float yaw, float pitch) {
   message.points[0].time_from_start = rclcpp::Duration(1s);
 
   start_mov_ = now();
-  std::cout << "mensje enviado" <<std::endl;
   pub_->publish(message);
+
+  std::cout << "mensje enviado" <<std::endl;
 }
 
+/*
 void
 HeadControllerNode::model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states)
 { 
@@ -136,14 +215,13 @@ HeadControllerNode::model_states_callback(const gazebo_msgs::msg::LinkStates::Sh
     }
   }
 }
-
+*/
 std::vector<std::string>
 HeadControllerNode::split(std::string str, char del)
 {
   std::string temp = "";
   std::vector<std::string> result;
 
-  std::cout << "gggg" << std::endl;
   for (int i = 0; i < str.size(); i++) {
     if (str[i] != del) {
       temp += str[i];
@@ -153,24 +231,18 @@ HeadControllerNode::split(std::string str, char del)
     }
   }
   result.push_back(temp);
-  std::cout << "gghhhhh" << std::endl;
   return result;
 }
-
-
 
 void
 HeadControllerNode::head_state_callback(
   const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) 
 {
-  /*
-  std::cout << "AAA" << std::endl;
-  if ( state->error.positions[0] < 0.1 && state->error.positions[1] < 0.1 ) {
-    std::cout << "bb" << std::endl;
+  float error = fabs(state->actual.positions[0] - (target_angle_*PI/180));
+  if ( error < 0.27 ) {
     reached_pos_ = true;
   }
-  std::cout << "NNNNN" << std::endl;
-  */
+  
 }
 
 }  // namespace tracking
