@@ -62,13 +62,15 @@ private:
   tf2::Stamped<tf2::Transform> object_tf;
 
   bool no_objects_;
+
   bool reached_pos_;
   float target_angle_;
   bool start_scan_;
-  std::string object_;
+
+  std::vector<tf2::Stamped<tf2::Transform>> targets_;
 
   std::vector<std::string> split(std::string str, char del);
-  std::vector<std::string> targets_;
+
   std::chrono::nanoseconds rate_;
 
   std::shared_ptr<ros2_knowledge_graph::GraphNode> graph_;
