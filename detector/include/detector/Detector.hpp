@@ -16,7 +16,6 @@
 #define DETECTOR__DETECTOR_HPP_
 
 #include <string>
-#include <chrono>
 #include <vector>
 
 #include "lifecycle_msgs/msg/state.hpp"
@@ -36,7 +35,7 @@ namespace detector
 class DetectorNode : public rclcpp_lifecycle::LifecycleNode
 {
 public:
-  DetectorNode(const std::string & name, const std::chrono::nanoseconds & rate);
+  DetectorNode(const std::string & name);
 
   using CallbackReturnT =
     rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -49,20 +48,16 @@ public:
 
 private:
   rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr sub_;
-  rclcpp_lifecycle::LifecyclePublisher<gazebo_msgs::msg::LinkStates>::SharedPtr pub_;
-  rclcpp::TimerBase::SharedPtr timer_;
   std::shared_ptr<ros2_knowledge_graph::GraphNode> graph_;
-
-  std::chrono::nanoseconds rate_;
 
   double detection_dist_;
 
   std::vector<std::string> targets_;
-  std::vector<std::string> finded_targets_;
-  std::vector<geometry_msgs::msg::Point> finded_coords_;
 
   void near_objects_publisher(void);
   std::vector<std::string> split(std::string str, char del);
+  int find_targets(std::vector<std::string> targets, std::string to_find);
+  void init_graph(void);
 };
 
 }  // namespace detector
