@@ -110,17 +110,46 @@ void HeadControllerNode::HeadControl(void) {
 
   for (int i = 0; i < edges.size() ; i++) {
     if (edges[i].content.type == STRING && edges[i].content.string_value == "able_to_see"){
-      std::cout << "Able to see: " <<  edges[i].target_node_id << std::endl;
-
+      //std::cout << "Able to see: " <<  edges[i].target_node_id << std::endl;
+      start_scan_ = false;
+      
+      std::vector<ros2_knowledge_graph_msgs::msg::Edge> tf_vector = graph_->get_edges("tiago", edges[i].target_node_id, TF);
+      if (tf_vector.size() != 0) {
+        targets_.push_back(tf_vector[0].content.tf_value);
+        for (const auto & tar : targets_) {
+          std::cout << tar.getOrigin() << " -- " ;
+        }
+        std::cout << std::endl;
+      }
+      //update_targets();
+      
     } else {
-      std::cout << "SCAN" << std::endl;
-      scan();
-      return;
+      start_scan_ = true;
     }
   }
 
-
+  if(start_scan_) {
+    std::cout << "SCAN" << std::endl;
+    scan();
+  } else {
+    //look_at_target()
+  }
 }
+
+/* 
+void look_at_target(void) {
+  tf2::Vector3 pos = target_tf_.getOrigin();
+  float angle = 360 * atan(pos[1]/pos[0])/ (2*PI);
+  moveHead(angle,0);
+}
+*/
+
+/*
+void update_targets(std::vector<ros2_knowledge_graph_msgs::msg::Edge> new_tf) {
+  elegir target_tf_ 
+  add_edge("Looking at")(?)
+}
+*/
 
 void HeadControllerNode::scan(void)
 { 

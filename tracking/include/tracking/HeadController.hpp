@@ -67,7 +67,7 @@ private:
   float target_angle_;
   bool start_scan_;
 
-  std::vector<tf2::Stamped<tf2::Transform>> targets_;
+  std::vector<geometry_msgs::msg::TransformStamped> targets_;
 
   std::vector<std::string> split(std::string str, char del);
 
