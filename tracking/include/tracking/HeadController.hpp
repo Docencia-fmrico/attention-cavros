@@ -27,6 +27,7 @@
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 #include "gazebo_msgs/msg/link_states.hpp"
+#include "std_msgs/msg/string.hpp"
 
 #include "ros2_knowledge_graph/GraphNode.hpp"
 #include "ros2_knowledge_graph/graph_utils.hpp"
@@ -44,38 +45,33 @@ public:
   void init_graph(void);
 
 private:
-  rclcpp::Subscription<control_msgs::msg::JointTrajectoryControllerState>::SharedPtr sub_;
+  rclcpp::Subscription<control_msgs::msg::JointTrajectoryControllerState>::SharedPtr state_sub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr pub_;
-  //rclcpp::Subscription<gazebo_msgs::msg::LinkStates>::SharedPtr gazebo_sub_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr target_sub_;
+
   rclcpp::TimerBase::SharedPtr timer_;
+  std::chrono::nanoseconds rate_;
 
   void scan(void);
   void head_state_callback(const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) ;
-  //void model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states);
   void moveHead(float yaw, float pitch);
   void HeadControl(void);
   void look_at_target(void);
   void update_targets(ros2_knowledge_graph_msgs::msg::Edge new_tf,  std::string target_node_name);
+  void target_object_callback (const std_msgs::msg::String::SharedPtr msg);
+  std::vector<std::string> split(std::string str, char del);
   
   void add_node(void);
   void add_edge(void);
 
-  rclcpp::Time start_mov_ ;
-  tf2::Stamped<tf2::Transform> object_tf;
-
-  bool no_objects_;
-
   bool reached_pos_;
-  float target_angle_;
   bool start_scan_;
 
-  geometry_msgs::msg::TransformStamped target_tf_;
+  geometry_msgs::msg::TransformStamped  target_tf_;
+  std::string                           target_object_;
+  float                                 target_angle_;
+
   ros2_knowledge_graph_msgs::msg::Edge looking_at_;
-
-  std::vector<std::string> split(std::string str, char del);
-
-  std::chrono::nanoseconds rate_;
-
   std::shared_ptr<ros2_knowledge_graph::GraphNode> graph_;
 };
 

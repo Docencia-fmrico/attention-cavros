@@ -29,21 +29,27 @@ HeadControllerNode::HeadControllerNode(
 : Node(name)
 {
   
-  sub_ = create_subscription<control_msgs::msg::JointTrajectoryControllerState>(
+  state_sub_ = create_subscription<control_msgs::msg::JointTrajectoryControllerState>(
     "/head_controller/state", 10,
     std::bind(&HeadControllerNode::head_state_callback, this, _1));
   
   pub_ = create_publisher<trajectory_msgs::msg::JointTrajectory>(
     "/head_controller/joint_trajectory", 10);
 
+  target_sub_ = create_subscription<std_msgs::msg::String>(
+    "/target_object", 10,
+    std::bind(&HeadControllerNode::target_object_callback, this, _1));
+
   timer_ = create_wall_timer(
     rate, std::bind(&HeadControllerNode::HeadControl, this));
 
-  start_mov_ = now();
-  no_objects_ = true;
   reached_pos_ = true;
   start_scan_ = true;
+  target_object_ = "";
+}
 
+void HeadControllerNode::target_object_callback (const std_msgs::msg::String::SharedPtr msg){
+  target_object_ = msg->data;
 }
 
 void
@@ -108,21 +114,24 @@ void HeadControllerNode::HeadControl(void) {
 
   //std::vector<ros2_knowledge_graph_msgs::msg::Edge> edges = graph_->get_edges();
   std::vector<ros2_knowledge_graph_msgs::msg::Edge> able_to_see_edges = graph_->get_edges_from_node_by_data("tiago", "able_to_see");
+  std::cout << "TARGET OBJECT: " << target_object_ << std::endl;
 
-  if (able_to_see_edges.size() != 0){
+  if (able_to_see_edges.size() != 0 && target_object_ != "" ){
     for (const auto &edge : able_to_see_edges) {
       //std::cout << "Able to see: " <<  edge.target_node_id << std::endl;
-      start_scan_ = false;
+      if (target_object_ == (std::string)edge.target_node_id) {
+        start_scan_ = false;
 
-      std::vector<ros2_knowledge_graph_msgs::msg::Edge> tf_vector = graph_->get_edges("tiago", edge.target_node_id, TF);
-      if (tf_vector.size() != 0) {
+        std::vector<ros2_knowledge_graph_msgs::msg::Edge> tf_vector = graph_->get_edges("tiago", edge.target_node_id, TF);
+        if (tf_vector.size() != 0) {
+          std::cout << "target TF of " << edge.target_node_id << " : ";
 
-        std::cout << "target TF of " << edge.target_node_id << " : ";
-        for (const auto & tar : tf_vector) {
-          std::cout << tar.content.tf_value.transform.translation.x << " -- " ;
-          if (reached_pos_) update_targets(tar,(std::string)edge.target_node_id);
+          for (const auto & tf_edge : tf_vector) {
+            std::cout << tf_edge.content.tf_value.transform.translation.x << " -- " ;
+            update_targets(tf_edge,(std::string)edge.target_node_id);
+          }
+          std::cout << std::endl;
         }
-        std::cout << std::endl;
       }
     }
   } else {
@@ -132,7 +141,9 @@ void HeadControllerNode::HeadControl(void) {
   if(start_scan_) {
     std::cout << "SCAN" << std::endl;
     scan();
-  } 
+  } else {
+    look_at_target();
+  }
 }
 
 void HeadControllerNode::look_at_target(void) {
@@ -141,7 +152,6 @@ void HeadControllerNode::look_at_target(void) {
     float x = target_tf_.transform.translation.x;
     float y = target_tf_.transform.translation.y;
 
-    
     float angle = 360 * atan(y/x)/ (2*PI);
     if ( x == 0 ) angle = 0.0;
     std::cout << "Target at angle: " << angle << std::endl;
@@ -158,7 +168,6 @@ void HeadControllerNode::look_at_target(void) {
 void HeadControllerNode::update_targets(ros2_knowledge_graph_msgs::msg::Edge new_tf, std::string target_node_name) {
   
   target_tf_ = new_tf.content.tf_value;
-  look_at_target();
 
   ros2_knowledge_graph_msgs::msg::Content looking_at_content;
   looking_at_.source_node_id = "tiago";
@@ -219,7 +228,6 @@ void HeadControllerNode::moveHead(float yaw, float pitch) {
 
   message.points[0].time_from_start = rclcpp::Duration(1s);
 
-  start_mov_ = now();
   pub_->publish(message);
 
   std::cout << "mensje enviado" <<std::endl;
@@ -290,7 +298,8 @@ HeadControllerNode::head_state_callback(
   const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) 
 {
   float error = fabs(state->actual.positions[0] - (target_angle_*PI/180));
-  if ( error < 0.2 ) {
+  std::cout <<"error: "<< error << std::endl;
+  if ( error < 0.3 ) {
     reached_pos_ = true;
   }
   
