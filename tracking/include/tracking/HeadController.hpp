@@ -54,6 +54,8 @@ private:
   //void model_states_callback(const gazebo_msgs::msg::LinkStates::SharedPtr states);
   void moveHead(float yaw, float pitch);
   void HeadControl(void);
+  void look_at_target(void);
+  void update_targets(ros2_knowledge_graph_msgs::msg::Edge new_tf,  std::string target_node_name);
   
   void add_node(void);
   void add_edge(void);
@@ -67,7 +69,8 @@ private:
   float target_angle_;
   bool start_scan_;
 
-  std::vector<geometry_msgs::msg::TransformStamped> targets_;
+  geometry_msgs::msg::TransformStamped target_tf_;
+  ros2_knowledge_graph_msgs::msg::Edge looking_at_;
 
   std::vector<std::string> split(std::string str, char del);
 
