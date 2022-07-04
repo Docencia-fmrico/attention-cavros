@@ -12,6 +12,7 @@ find_package(trajectory_msgs REQUIRED)
 find_package(gazebo_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(ros2_knowledge_graph REQUIRED)
+find_package(std_msgs REQUIRED)
 
 set(dependencies
     rclcpp
@@ -21,6 +22,7 @@ set(dependencies
     gazebo_msgs
     tf2_msgs
     ros2_knowledge_graph
+    std_msgs
 )
 
 include_directories(include)
