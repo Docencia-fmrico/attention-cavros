@@ -56,8 +56,8 @@ void
 HeadControllerNode::init_graph(void)
 {
   graph_ = std::make_shared<ros2_knowledge_graph::GraphNode>(shared_from_this());
-  add_node();
-  add_edge();
+  //add_node();
+  //add_edge();
 }
 
 void
@@ -152,7 +152,7 @@ void HeadControllerNode::look_at_target(void) {
     float x = target_tf_.transform.translation.x;
     float y = target_tf_.transform.translation.y;
 
-    float angle = 360 * atan(y/x)/ (2*PI);
+    float angle = atan(y/x);
     if ( x == 0 ) angle = 0.0;
     std::cout << "Target at angle: " << angle << std::endl;
     target_angle_ = angle;
@@ -186,23 +186,22 @@ void HeadControllerNode::scan(void)
 { 
   if(start_scan_) {
     start_scan_ = false;
-    target_angle_ = 90;
+    target_angle_ = PI/2;
   }
 
   if(reached_pos_) {
     target_angle_ = target_angle_ * -1;
-    moveHead(target_angle_,0);
     reached_pos_ = false;
   }
-
+  moveHead(target_angle_,0);
 }
 
 void HeadControllerNode::moveHead(float yaw, float pitch) {
 
   trajectory_msgs::msg::JointTrajectory message;
 
-  float joint_yaw = yaw * (1.3 / 75);
-  float joint_pitch = pitch * 0.7853 / 90;
+  float joint_yaw = yaw * (1.3 / (5*PI/12));
+  float joint_pitch = pitch * 0.7853 / (PI/2);
 
   message.header.frame_id = "";
   message.header.stamp = this->now();
@@ -297,9 +296,9 @@ void
 HeadControllerNode::head_state_callback(
   const control_msgs::msg::JointTrajectoryControllerState::SharedPtr state) 
 {
-  float error = fabs(state->actual.positions[0] - (target_angle_*PI/180));
-  std::cout <<"error: "<< error << std::endl;
-  if ( error < 0.3 ) {
+  float error = fabs(state->actual.positions[0] - (target_angle_));
+  //std::cout <<"error: "<< error << std::endl;
+  if ( error < 0.3 || fabs(target_angle_) > PI/2 ) {
     reached_pos_ = true;
   }
   
